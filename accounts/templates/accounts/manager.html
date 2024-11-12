@@ -163,7 +163,6 @@
             background-color: #0056b3;
         }
     </style>
-</head>
 <body>
     <div class="navbar">
         <h1>Learning Hub</h1>
@@ -189,9 +188,21 @@
     </div>
 
     <div class="content">
-        <div class="centered-container">
-            <button class="btn-create" onclick="showForm()">Create New Request</button>
-        </div>
+       
+    <div class="centered-container">
+    <button class="btn-create" id="createRequestBtn">Create New Request</button>
+    </div>
+
+     <script>
+    const createRequestBtn = document.getElementById('createRequestBtn');
+
+    
+    createRequestBtn.addEventListener('click', function() {
+        
+        window.location.href = "/Users/kokkallahithasree/Downloads/createreq.html"; 
+    });
+</script>
+
 
         <table class="request-table">
             <thead>
@@ -213,30 +224,7 @@
                 </tr>
             </tbody>
         </table>
-
-        <script>
-            function showForm() {
-                const formSection = document.getElementById('createForm');
-                formSection.style.display = 'block';
-            }
-        </script>
-
-        <div class="form-section" id="createForm">
-            <h2>Create Request</h2>
-            <form>
-                <input type="text" placeholder="Request ID">
-                <input type="text" placeholder="Name">
-                <input type="text" placeholder="Course Name">
-                <input type="text" placeholder="Description">
-                <input type="text" placeholder="Concepts">
-                <input type="text" placeholder="Duration">
-                <input type="text" placeholder="Employee Position">
-                <input type="text" placeholder="Status">
-                <div class="centered-container">
-                    <button type="submit" class="submit-btn">Submit Request</button>
-                </div>
-            </form>
-        </div>
     </div>
 </body>
 </html>
+
