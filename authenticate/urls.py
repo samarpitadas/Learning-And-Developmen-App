@@ -12,6 +12,7 @@ urlpatterns = [
     path('submit-request/', views.submit_request, name='submit_request'),
     path('create-course/', views.create_course, name='create_course'),
     path('track-progress/', views.track_progress, name='track_progress'),
+    path('generate-cred/',views.generate_cred, name='generate_cred'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('manager-dashboard/', views.manager_dashboard, name='manager_dashboard'),
     path('employee-dashboard/', views.employee_dashboard, name='employee_dashboard'),

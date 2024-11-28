@@ -175,6 +175,12 @@ def track_progress(request):
     return HttpResponseForbidden("Access Denied")
 
 @login_required
+def generate_cred(request):
+    if request.user.userprofile.role in ['admin']:
+        return render(request, 'authenticate/generate_cred.html')
+    return HttpResponseForbidden("Access Denied")
+
+@login_required
 def admin_dashboard(request):
     if request.user.userprofile.role != 'admin':
         messages.error(request, 'Access Denied: Admin privileges required')
