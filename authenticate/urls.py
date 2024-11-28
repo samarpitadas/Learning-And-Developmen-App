@@ -20,11 +20,9 @@ urlpatterns = [
     path('my-requests/', views.my_requests, name='my_requests'),
     path('delete-request/<int:request_id>/', views.delete_request, name='delete_request'),
     path('delete-course/<int:course_id>/', views.delete_course, name='delete_course'),
-    
     path('submit-request/', views.submit_request, name='submit_request'),
     path('admin-requests/', views.admin_requests, name='admin_requests'),
     path('handle-request/<int:request_id>/', views.handle_request, name='handle_request'),
-   
 ]
 
 

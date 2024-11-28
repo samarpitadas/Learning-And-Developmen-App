@@ -14,7 +14,6 @@ urlpatterns = [
     path('api/', include('authenticate.urls')),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='accounts_login'),
     path('api/view-requests/', views.view_requests, name='view_requests'),
-    path('api/my-progress/', views.my_progress_view, name='my_progress')
-
+    path('api/my-progress/', views.my_progress_view, name='my_progress'),
 ]
 

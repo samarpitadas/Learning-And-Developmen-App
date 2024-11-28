@@ -21,8 +21,55 @@
                 <label class="form-label">Duration (hours)</label>
                 <input type="number" class="form-control" name="duration">
             </div>
+    
+            <!-- Modules Section -->
+            <div id="modules-container">
+                <h4>Modules</h4>
+            </div>
+            
+            <!-- Button to Add New Module -->
+            <button type="button" id="add-module-btn" class="btn btn-secondary">Add Module</button>
+    
+            <br><br>
             <button type="submit" class="btn btn-primary">Create Course</button>
         </form>
     </div>
+    
+    <script>
+        document.getElementById('add-module-btn').addEventListener('click', function() {
+            // Create new module section
+            const newModuleDiv = document.createElement('div');
+            newModuleDiv.classList.add('module');
+    
+            // Module Heading
+            const headingLabel = document.createElement('label');
+            headingLabel.classList.add('form-label');
+            headingLabel.textContent = 'Module Heading';
+            const headingInput = document.createElement('input');
+            headingInput.type = 'text';
+            headingInput.classList.add('form-control');
+            headingInput.name = 'module_heading[]';
+            headingInput.required = true;
+    
+            // Module Description
+            const descriptionLabel = document.createElement('label');
+            descriptionLabel.classList.add('form-label');
+            descriptionLabel.textContent = 'Module Description';
+            const descriptionTextarea = document.createElement('textarea');
+            descriptionTextarea.classList.add('form-control');
+            descriptionTextarea.name = 'module_description[]';
+            descriptionTextarea.rows = 3;
+            descriptionTextarea.required = true;
+    
+            // Append new fields to the new module div
+            newModuleDiv.appendChild(headingLabel);
+            newModuleDiv.appendChild(headingInput);
+            newModuleDiv.appendChild(descriptionLabel);
+            newModuleDiv.appendChild(descriptionTextarea);
+    
+            // Append the new module div to the modules container
+            document.getElementById('modules-container').appendChild(newModuleDiv);
+        });
+    </script>    
 </body>
 </html>

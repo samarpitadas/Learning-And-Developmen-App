@@ -37,6 +37,14 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.title} - Created by {self.created_by.username}"
 
+class Module(models.Model):
+    course = models.ForeignKey(Course, related_name="modules", on_delete=models.CASCADE)
+    heading = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.heading
+        
 class ManagerRequest(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),

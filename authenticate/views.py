@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
-from .models import UserProfile, Course, Request, ManagerRequest
+from .models import UserProfile, Course, Request, ManagerRequest, Module
 
 def home(request):
     if request.user.is_authenticated:
@@ -111,11 +111,24 @@ def submit_request(request):
 def create_course(request):
     if request.user.userprofile.role in ['admin', 'manager']:
         if request.method == 'POST':
-            Course.objects.create(
+            course=Course.objects.create(
                 title=request.POST['title'],
                 description=request.POST['description'],
                 created_by=request.user
             )
+
+             # Get the module data from the POST request
+            module_headings = request.POST.getlist('module_heading[]')
+            module_descriptions = request.POST.getlist('module_description[]')
+
+            # Create Modules for the Course
+            for heading, description in zip(module_headings, module_descriptions):
+                Module.objects.create(
+                    course=course,
+                    heading=heading,
+                    description=description
+                )
+
             messages.success(request, 'Course created successfully!')
             if request.user.userprofile.role == 'manager':
                 return redirect('manager_dashboard')

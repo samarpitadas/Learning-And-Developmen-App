@@ -14,8 +14,23 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ course.title }}</h5>
                         <p class="card-text">{{ course.description }}</p>
+                        
+    
+                        <!-- Displaying modules for the course -->
+                        <h6>Modules:</h6>
+                        <ul>
+                            {% for module in course.modules.all %}
+                                <li>
+                                    <strong>{{ module.heading }}</strong>
+                                    <p>{{ module.description }}</p>
+                                </li>
+                            {% empty %}
+                                <li>No modules available for this course.</li>
+                            {% endfor %}
+                        </ul>
                         <p class="text-muted">Created by: {{ course.created_by.username }}</p>
                         <p class="text-muted">Date: {{ course.created_at }}</p>
+                        
                         {% if user.userprofile.role == 'admin' %}
                         <a href="/api/delete-course/{{ course.id }}/" class="btn btn-danger">Delete Course</a>
                         {% endif %}
@@ -26,6 +41,7 @@
         </div>
         <a href="javascript:history.back()" class="btn btn-primary">Back</a>
     </div>
+    
 </body>
 </html>
 
