@@ -282,3 +282,54 @@ def my_progress_view(request):
         ]
     }
     return render(request, 'authenticate/progress.html', context)
+
+
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+import random
+import string
+from authenticate.models import UserProfile
+
+@login_required
+def generate_cred(request):
+    if request.user.userprofile.role != 'admin':
+        return HttpResponseForbidden("Access Denied")
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', 'Employee')
+        last_name = request.POST.get('last_name', 'User')
+        email = request.POST.get('email', '').strip()
+
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({'error': 'Email is already taken. Please try another one.'}, status=400)
+
+
+        username = f"{first_name.lower()}.{last_name.lower()}{random.randint(100, 999)}"
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
+
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email
+        )
+
+        try:
+            user_profile = UserProfile.objects.get(user=user)
+            
+        except ObjectDoesNotExist:
+           
+            UserProfile.objects.create(user=user, role='employee')
+
+       
+        return JsonResponse({'username': username, 'password': password})
+
+    return render(request, 'authenticate/generate_cred.html')
+
+
+ 
