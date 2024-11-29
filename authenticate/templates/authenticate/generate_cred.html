@@ -59,35 +59,7 @@
 
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-
-                        <!-- Role -->
-                        <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
-                            <select class="form-select" id="role" name="role" required>
-                                <option value="" disabled selected>Select a Role</option>
-                                <option value="employee">Employee</option>v
-                            </select>
-                        </div>
-
-                        
-                        <!-- Username -->
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="mb-3">
-                            <label for="password1" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password1" name="password1" required>
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div class="mb-3">
-                            <label for="password2" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="password2" name="password2" required>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ request.POST.email }}" required>
                         </div>
 
                         <button type="submit" class="btn btn-register">Generate</button>
