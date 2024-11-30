@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Create Course</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container mt-5">
         <h2>Create New Course</h2>
@@ -21,27 +23,34 @@
                 <label class="form-label">Duration (hours)</label>
                 <input type="number" class="form-control" name="duration">
             </div>
-    
-            <!-- Modules Section -->
+
+            
             <div id="modules-container">
                 <h4>Modules</h4>
             </div>
+
+           
+            <button type="button" id="add-module-btn" class="btn btn-secondary mb-3">Add Module</button>
+
             
-            <!-- Button to Add New Module -->
-            <button type="button" id="add-module-btn" class="btn btn-secondary">Add Module</button>
-    
+            <div id="emails-container">
+                <h4>Employee Emails</h4>
+            </div>
+
+            
+            <button type="button" id="add-email-btn" class="btn btn-secondary mb-3">Add Email</button>
+
             <br><br>
             <button type="submit" class="btn btn-primary">Create Course</button>
         </form>
     </div>
-    
+
     <script>
-        document.getElementById('add-module-btn').addEventListener('click', function() {
-            // Create new module section
+        
+        document.getElementById('add-module-btn').addEventListener('click', function () {
             const newModuleDiv = document.createElement('div');
             newModuleDiv.classList.add('module');
-    
-            // Module Heading
+
             const headingLabel = document.createElement('label');
             headingLabel.classList.add('form-label');
             headingLabel.textContent = 'Module Heading';
@@ -50,8 +59,7 @@
             headingInput.classList.add('form-control');
             headingInput.name = 'module_heading[]';
             headingInput.required = true;
-    
-            // Module Description
+
             const descriptionLabel = document.createElement('label');
             descriptionLabel.classList.add('form-label');
             descriptionLabel.textContent = 'Module Description';
@@ -60,16 +68,35 @@
             descriptionTextarea.name = 'module_description[]';
             descriptionTextarea.rows = 3;
             descriptionTextarea.required = true;
-    
-            // Append new fields to the new module div
+
             newModuleDiv.appendChild(headingLabel);
             newModuleDiv.appendChild(headingInput);
             newModuleDiv.appendChild(descriptionLabel);
             newModuleDiv.appendChild(descriptionTextarea);
-    
-            // Append the new module div to the modules container
+
             document.getElementById('modules-container').appendChild(newModuleDiv);
         });
-    </script>    
+
+       
+        document.getElementById('add-email-btn').addEventListener('click', function () {
+            const newEmailDiv = document.createElement('div');
+            newEmailDiv.classList.add('email');
+
+            const emailLabel = document.createElement('label');
+            emailLabel.classList.add('form-label');
+            emailLabel.textContent = 'Employee Email';
+            const emailInput = document.createElement('input');
+            emailInput.type = 'email';
+            emailInput.classList.add('form-control');
+            emailInput.name = 'employee_emails[]';  
+            emailInput.required = true;
+
+            newEmailDiv.appendChild(emailLabel);
+            newEmailDiv.appendChild(emailInput);
+
+            document.getElementById('emails-container').appendChild(newEmailDiv);
+        });
+    </script>
 </body>
+
 </html>

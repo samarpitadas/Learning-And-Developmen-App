@@ -44,6 +44,13 @@ class Module(models.Model):
 
     def __str__(self):
         return self.heading
+
+class EmployeeEmail(models.Model):
+    course = models.ForeignKey(Course, related_name="employee_emails", on_delete=models.CASCADE)
+    email = models.EmailField()
+
+    def __str__(self):
+        return self.email
         
 class ManagerRequest(models.Model):
     STATUS_CHOICES = (

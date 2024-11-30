@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
-from .models import UserProfile, Course, Request, ManagerRequest, Module
+from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail
 
 def home(request):
     if request.user.is_authenticated:
@@ -109,7 +109,7 @@ def submit_request(request):
 
 @login_required
 def create_course(request):
-    if request.user.userprofile.role in ['admin', 'manager']:
+    if request.user.userprofile.role in ['admin']:
         if request.method == 'POST':
             course=Course.objects.create(
                 title=request.POST['title'],
@@ -128,18 +128,31 @@ def create_course(request):
                     heading=heading,
                     description=description
                 )
+            
+            employee_emails = request.POST.getlist('employee_emails[]')
+
+            for email in employee_emails:
+                EmployeeEmail.objects.create(
+                    course=course,
+                    email=email
+                )
 
             messages.success(request, 'Course created successfully!')
-            if request.user.userprofile.role == 'manager':
-                return redirect('manager_dashboard')
             return redirect('admin_dashboard')
         return render(request, 'authenticate/create_course.html')
     return HttpResponseForbidden("Access Denied")
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Course, EmployeeEmail
+
 @login_required
 def view_courses(request):
-    courses = Course.objects.all().order_by('-created_at')
-    return render(request, 'authenticate/view_courses.html', {'courses': courses})
+    user_email = request.user.email
+    accessible_courses = Course.objects.filter(employee_emails__email=user_email).order_by('-created_at')
+    if request.user.userprofile.role in ['admin', 'manager']:
+        accessible_courses = Course.objects.all().order_by('-created_at')
+    return render(request, 'authenticate/view_courses.html', {'courses': accessible_courses})
 
 @login_required
 def handle_request(request, request_id):
