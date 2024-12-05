@@ -59,6 +59,15 @@ class UserModuleCompletion(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.module.heading} completion"
+
+class CourseFeedback(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course_name = models.CharField(max_length=255)
+    feedback = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Feedback for {self.course_name} by {self.user.username}"
         
 class ManagerRequest(models.Model):
     STATUS_CHOICES = (

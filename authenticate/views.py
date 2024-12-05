@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
-from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, UserModuleCompletion
+from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, UserModuleCompletion, CourseFeedback
 
 def home(request):
     if request.user.is_authenticated:
@@ -402,4 +402,31 @@ def generate_cred(request):
     return render(request, 'authenticate/generate_cred.html')
 
 
- 
+@login_required
+def submit_feedback(request):
+    if request.method == 'POST':
+        if request.user.userprofile.role == 'employee':
+            # Extract the course name and feedback from the form
+            course_name = request.POST['course_name']
+            feedback = request.POST['feedback']
+
+            # Save the feedback
+            CourseFeedback.objects.create(
+                user=request.user,
+                course_name=course_name,
+                feedback=feedback
+            )
+
+            messages.success(request, 'Feedback submitted successfully!')
+            return redirect('employee_dashboard')
+        else:
+            messages.error(request, 'You are not authorized to submit feedback.')
+            return redirect('employee_dashboard')
+
+    return render(request, 'authenticate/submit_feedback.html')
+
+@login_required
+def view_feedback(request):
+        feedback_list = CourseFeedback.objects.all()  # Fetch all feedback entries
+        return render(request, 'authenticate/view_feedback.html', {'feedback_list': feedback_list})
+   

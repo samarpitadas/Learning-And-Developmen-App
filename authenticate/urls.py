@@ -26,6 +26,8 @@ urlpatterns = [
     path('submit-request/', views.submit_request, name='submit_request'),
     path('admin-requests/', views.admin_requests, name='admin_requests'),
     path('handle-request/<int:request_id>/', views.handle_request, name='handle_request'),
+    path('submit-feedback/', views.submit_feedback, name='submit_feedback'),
+    path('view-feedback/', views.view_feedback, name='view_feedback'),
 ]
 
 
