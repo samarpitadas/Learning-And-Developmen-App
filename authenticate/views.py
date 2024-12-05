@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
-from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail
+from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, UserModuleCompletion
 
 def home(request):
     if request.user.is_authenticated:
@@ -142,10 +142,6 @@ def create_course(request):
         return render(request, 'authenticate/create_course.html')
     return HttpResponseForbidden("Access Denied")
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Course, EmployeeEmail
-
 @login_required
 def view_courses(request):
     user_email = request.user.email
@@ -153,6 +149,67 @@ def view_courses(request):
     if request.user.userprofile.role in ['admin', 'manager']:
         accessible_courses = Course.objects.all().order_by('-created_at')
     return render(request, 'authenticate/view_courses.html', {'courses': accessible_courses})
+
+@login_required
+def view_course_details(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    completed_modules = UserModuleCompletion.objects.filter(user=request.user, module__course=course, completed=True).values_list('module', flat=True)
+    
+    return render(request, 'authenticate/view_course_details.html', {
+        'course': course,
+        'completed_modules': completed_modules
+    })
+
+@login_required
+def update_module_completion(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+
+    if request.method == 'POST':
+        completed_modules = request.POST.getlist('modules')
+        
+        for module in course.modules.all():
+            completion_status, created = UserModuleCompletion.objects.get_or_create(user=request.user, module=module)
+            if str(module.id) in completed_modules:
+                completion_status.completed = True
+            else:
+                completion_status.completed = False
+            completion_status.save()
+
+    return redirect('view_course_details', course_id=course.id)
+
+@login_required
+def track_progress(request):
+   
+    employee_emails = request.POST.getlist('employee_emails[]')
+    courses = Course.objects.all()
+    progress_data = []
+
+    
+    for course in courses:
+        
+        enrolled_users = User.objects.filter(employee_emails__email__in=employee_emails)
+        course_progress = []
+
+        for user in enrolled_users:
+            total_modules = course.modules.count()
+            completed_modules = UserModuleCompletion.objects.filter(user=user, module__course=course, completed=True).count()
+            progress_percentage = (completed_modules / total_modules) * 100 if total_modules else 0
+
+            course_progress.append({
+                'username': user.username,
+                'completed_modules': completed_modules,
+                'total_modules': total_modules,
+                'progress_percentage': progress_percentage
+            })
+
+        progress_data.append({
+            'course': course,
+            'course_progress': course_progress
+        })
+
+    return render(request, 'authenticate/track_progress.html', {
+        'progress_data': progress_data
+    })
 
 @login_required
 def handle_request(request, request_id):

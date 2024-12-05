@@ -51,6 +51,14 @@ class EmployeeEmail(models.Model):
 
     def __str__(self):
         return self.email
+
+class UserModuleCompletion(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.module.heading} completion"
         
 class ManagerRequest(models.Model):
     STATUS_CHOICES = (

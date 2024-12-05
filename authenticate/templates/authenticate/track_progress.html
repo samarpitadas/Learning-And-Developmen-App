@@ -6,24 +6,49 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Progress Tracking Dashboard</h2>
+        <h2>Course Progress Tracking</h2>
+
         <div class="row mt-4">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
                         Course Completion Rates
                     </div>
                     <div class="card-body">
-                        <ul class="list-group">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Course A
-                                <span class="badge bg-primary rounded-pill">70%</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Course B
-                                <span class="badge bg-primary rounded-pill">45%</span>
-                            </li>
-                        </ul>
+                        <!-- Table displaying course progress -->
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Course</th>
+                                    <th scope="col">User</th>
+                                    <th scope="col">Completed Modules</th>
+                                    <th scope="col">Total Modules</th>
+                                    <th scope="col">Progress (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in progress_data %}
+                                    {% for user_progress in data.course_progress %}
+                                        <tr>
+                                            <!-- Course Name -->
+                                            <td>{{ data.course.title }}</td>
+                                            <!-- Username -->
+                                            <td>{{ user_progress.username }}</td>
+                                            <!-- Completed Modules -->
+                                            <td>{{ user_progress.completed_modules }}</td>
+                                            <!-- Total Modules -->
+                                            <td>{{ user_progress.total_modules }}</td>
+                                            <!-- Progress Percentage -->
+                                            <td>{{ user_progress.progress_percentage|floatformat:1 }}%</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5">No courses found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

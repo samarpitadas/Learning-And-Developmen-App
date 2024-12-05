@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ course.title }} - Course Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>{{ course.title }}</h2>
+        <p>{{ course.description }}</p>
+
+        <h5>Modules:</h5>
+        <form method="POST" action="{% url 'update_module_completion' course.id %}">
+            {% csrf_token %}
+            <ul>
+                {% for module in course.modules.all %}
+                    <li>
+                        <strong>{{ module.heading }}</strong>
+                        <p>{{ module.description }}</p>
+                        <input type="checkbox" name="modules" value="{{ module.id }}" {% if module.id in completed_modules %}checked{% endif %}> Completed
+                    </li>
+                {% empty %}
+                    <li>No modules available for this course.</li>
+                {% endfor %}
+            </ul>
+
+            <button type="submit" class="btn btn-success">Update Progress</button>
+        </form>
+
+        <p class="text-muted">Created by: {{ course.created_by.username }}</p>
+        <p class="text-muted">Date: {{ course.created_at }}</p>
+        
+        <a href="javascript:history.back()" class="btn btn-primary">Back</a>
+    </div>
+</body>
+</html>
