@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Feedback</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body style="background-color: #f4f7fa;">
     <div class="container mt-5">
@@ -16,6 +17,7 @@
                 <tr>
                     <th>Course Name</th>
                     <th>Feedback</th>
+                    <th>Rating</th>
                     <th>Submitted By</th>
                     <th>Date Submitted</th>
                 </tr>
@@ -25,16 +27,23 @@
                 <tr>
                     <td>{{ feedback.course_name }}</td>
                     <td>{{ feedback.feedback }}</td>
+                    <td>{{ feedback.rating }}</td>
                     <td>{{ feedback.user.username }}</td>
                     <td>{{ feedback.created_at }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No feedback submitted yet.</td>
+                    <td colspan="5" class="text-center">No feedback submitted yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <!-- Graph Section -->
+        <div class="mt-5">
+            <h3 class="text-center">Average Ratings per Course</h3>
+            <canvas id="feedbackChart"></canvas>
+        </div>
 
         <!-- Back to Dashboard -->
         <div class="text-center mt-3">
@@ -45,5 +54,32 @@
     <!-- Bootstrap JS and Popper (for responsive behavior) -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+    <!-- Chart.js Script -->
+    <script>
+        var ctx = document.getElementById('feedbackChart').getContext('2d');
+        var feedbackChart = new Chart(ctx, {
+            type: 'bar',  // Bar chart type
+            data: {
+                labels: {{ course_labels|safe }},  // Courses
+                datasets: [{
+                    label: 'Average Rating',
+                    data: {{ average_values|safe }},  // Average Ratings
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5  // Max rating is 5
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

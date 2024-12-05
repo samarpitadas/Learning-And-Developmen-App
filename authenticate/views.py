@@ -406,15 +406,23 @@ def generate_cred(request):
 def submit_feedback(request):
     if request.method == 'POST':
         if request.user.userprofile.role == 'employee':
-            # Extract the course name and feedback from the form
+            # Extract the course name, feedback, and rating from the form
             course_name = request.POST['course_name']
             feedback = request.POST['feedback']
+            rating = request.POST.get('rating')  # Get the rating value (1-5)
 
-            # Save the feedback
+            # Check if rating was provided, set a default value if not (e.g., 0 or None)
+            if rating:
+                rating = int(rating)  # Convert to integer
+            else:
+                rating = None  # or set a default value if needed
+
+            # Save the feedback, including the rating
             CourseFeedback.objects.create(
                 user=request.user,
                 course_name=course_name,
-                feedback=feedback
+                feedback=feedback,
+                rating=rating  # Save the rating in the model
             )
 
             messages.success(request, 'Feedback submitted successfully!')
@@ -427,6 +435,34 @@ def submit_feedback(request):
 
 @login_required
 def view_feedback(request):
-        feedback_list = CourseFeedback.objects.all()  # Fetch all feedback entries
-        return render(request, 'authenticate/view_feedback.html', {'feedback_list': feedback_list})
-   
+    # Get all feedback entries
+    feedback_list = CourseFeedback.objects.all()
+
+    # Process data for the graph
+    course_names = list(feedback_list.values_list('course_name', flat=True))
+    ratings = list(feedback_list.values_list('rating', flat=True))
+
+    # Calculate the average rating for each course
+    from collections import defaultdict
+    course_ratings = defaultdict(list)
+
+    for course, rating in zip(course_names, ratings):
+        # Only add ratings that are not None
+        if rating is not None:
+            course_ratings[course].append(rating)
+
+    # Calculate average ratings, ensuring no division by zero
+    average_ratings = {
+        course: (sum(ratings) / len(ratings)) if ratings else 0  # Default to 0 if no ratings
+        for course, ratings in course_ratings.items()
+    }
+
+    # Prepare the data to pass to the template for graph
+    course_labels = list(average_ratings.keys())
+    average_values = list(average_ratings.values())
+
+    return render(request, 'authenticate/view_feedback.html', {
+        'feedback_list': feedback_list,
+        'course_labels': course_labels,
+        'average_values': average_values
+    })
