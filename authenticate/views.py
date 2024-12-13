@@ -179,20 +179,23 @@ def update_module_completion(request, course_id):
 
 @login_required
 def track_progress(request):
-   
-    employee_emails = request.POST.getlist('employee_emails[]')
+    
+    if request.user.userprofile.role not in ['manager', 'admin']:
+        return HttpResponseForbidden("Access Denied")   
+    employee_emails = request.POST.getlist('employee_emails[]') 
     courses = Course.objects.all()
     progress_data = []
 
-    
     for course in courses:
         
-        enrolled_users = User.objects.filter(employee_emails__email__in=employee_emails)
+        enrolled_emails = EmployeeEmail.objects.filter(course=course, email__in=employee_emails)
+        enrolled_users = User.objects.filter(id__in=[email.user.id for email in enrolled_emails])
+
         course_progress = []
 
-        for user in enrolled_users:
+        for user in enrolled_users:            
             total_modules = course.modules.count()
-            completed_modules = UserModuleCompletion.objects.filter(user=user, module__course=course, completed=True).count()
+            completed_modules = UserModuleCompletion.objects.filter(user=user, module__course=course, completed=True).count()            
             progress_percentage = (completed_modules / total_modules) * 100 if total_modules else 0
 
             course_progress.append({
@@ -201,7 +204,7 @@ def track_progress(request):
                 'total_modules': total_modules,
                 'progress_percentage': progress_percentage
             })
-
+       
         progress_data.append({
             'course': course,
             'course_progress': course_progress
@@ -238,11 +241,7 @@ def delete_course(request, course_id):
         messages.success(request, 'Course deleted successfully!')
     return redirect('view_courses')
 
-@login_required
-def track_progress(request):
-    if request.user.userprofile.role in ['manager', 'admin']:
-        return render(request, 'authenticate/track_progress.html')
-    return HttpResponseForbidden("Access Denied")
+
 
 @login_required
 def generate_cred(request):
