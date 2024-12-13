@@ -111,13 +111,13 @@ def submit_request(request):
 def create_course(request):
     if request.user.userprofile.role in ['admin']:
         if request.method == 'POST':
-            course=Course.objects.create(
+            course = Course.objects.create(
                 title=request.POST['title'],
                 description=request.POST['description'],
                 created_by=request.user
             )
 
-             # Get the module data from the POST request
+            # Get the module data from the POST request
             module_headings = request.POST.getlist('module_heading[]')
             module_descriptions = request.POST.getlist('module_description[]')
 
@@ -128,7 +128,7 @@ def create_course(request):
                     heading=heading,
                     description=description
                 )
-            
+
             employee_emails = request.POST.getlist('employee_emails[]')
 
             for email in employee_emails:
@@ -137,9 +137,11 @@ def create_course(request):
                     email=email
                 )
 
-            messages.success(request, 'Course created successfully!')
+            messages.success(request, 'Course created successfully and notifications sent!')
             return redirect('admin_dashboard')
+
         return render(request, 'authenticate/create_course.html')
+
     return HttpResponseForbidden("Access Denied")
 
 @login_required
@@ -465,3 +467,11 @@ def view_feedback(request):
         'course_labels': course_labels,
         'average_values': average_values
     })
+
+
+def view_notifications(request):
+    user_email = request.user.email
+    accessible_courses = Course.objects.filter(employee_emails__email=user_email).order_by('-created_at')
+    if request.user.userprofile.role in ['admin', 'manager']:
+        accessible_courses = Course.objects.all().order_by('-created_at')
+    return render(request, 'authenticate/view_notifications.html', {'courses': accessible_courses })

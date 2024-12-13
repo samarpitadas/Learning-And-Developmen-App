@@ -28,6 +28,7 @@ urlpatterns = [
     path('handle-request/<int:request_id>/', views.handle_request, name='handle_request'),
     path('submit-feedback/', views.submit_feedback, name='submit_feedback'),
     path('view-feedback/', views.view_feedback, name='view_feedback'),
+    path('view-notifications/', views.view_notifications, name='view_notifications'),
 ]
 
 

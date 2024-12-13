@@ -84,29 +84,6 @@
                 Welcome to Your Dashboard
             </h2>
 
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="progress-card">
-                        <i class="fas fa-book-reader fa-3x mb-3"></i>
-                        <h3>Courses Enrolled</h3>
-                        <h2>{{ enrolled_courses }}</h2>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="progress-card">
-                        <i class="fas fa-certificate fa-3x mb-3"></i>
-                        <h3>Completed Courses</h3>
-                        <h2>{{ completed_courses }}</h2>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="progress-card">
-                        <i class="fas fa-clipboard-list fa-3x mb-3"></i>
-                        <h3>Active Requests</h3>
-                        <h2>{{ active_requests }}</h2>
-                    </div>
-                </div>
-            </div>
 
             <div class="row">
                 <div class="col-md-6">
@@ -130,8 +107,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Feedback Section -->
             <div class="row">
                 <div class="col-md-6">
                     <div class="action-card card">
@@ -143,8 +118,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="action-card card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bell fa-3x mb-3 text-success"></i>
+                            <h4>Notifications</h4>
+                            <p>Get notified when assigned a course</p>
+                            <a href="/api/view-notifications/" class="btn btn-employee">View notifications</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
+            
         </div>
     </div>
 </body>
