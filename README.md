@@ -1,6 +1,6 @@
 # User authentication and Role Management
 django
 python
-postgres
+sql lite
 html css javascript
 
