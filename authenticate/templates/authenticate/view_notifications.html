@@ -36,6 +36,9 @@
         h2 {
             color: #202d92; /* Tomato color for heading */
         }
+        .notification-item.unread {
+            background-color: #fff3cd;
+        }
     </style>
 </head>
 <body>
@@ -43,16 +46,18 @@
         <div class="notifications-container">
             <h2><i class="fas fa-bell"></i> Notifications</h2>
             
-            <!-- Adjust the row to make each notification full-width -->
             <div class="row mt-4">
                 {% if courses %}
                     {% for course in courses %}
                         <div class="col-12 mb-3">
-                            <div class="notification-item">
+                            <div class="notification-item {% if not course.is_read %}unread{% endif %}">
                                 <h5>You have been assigned a new course!</h5>
                                 <p><strong>Assigned Course:</strong> {{ course.title }}</p>
                                 <p class="text-muted"><strong>Date:</strong> {{ course.created_at }}</p>
-            
+
+                                {% if not course.is_read %}
+                                    <a href="{% url 'mark_as_read' course.id %}" class="btn btn-success btn-sm">Mark as Read</a>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}

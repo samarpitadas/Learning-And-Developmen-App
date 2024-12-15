@@ -7,13 +7,19 @@
     <title>View Feedback</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        #ratingPieChart {
+            width: 30px;
+            height: 30px;
+        }
+    </style>
 </head>
 
 <body style="background-color: #f4f7fa;">
     <div class="container mt-5">
         <h2 class="text-center mb-4">All Feedbacks</h2>
 
-        <!-- Feedback Table -->
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -41,35 +47,38 @@
             </tbody>
         </table>
 
-        <!-- Graph Section -->
-        <div class="mt-5">
-            <h3 class="text-center">Average Ratings per Course</h3>
-            <canvas id="feedbackChart"></canvas>
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <h3 class="text-center">Average Ratings per Course</h3>
+                <canvas id="feedbackChart"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h3 class="text-center">Rating Distribution (1-5 stars)</h3>
+                <canvas id="ratingPieChart"></canvas>
+            </div>
         </div>
 
-        <!-- Back to Dashboard -->
         <div class="text-center mt-3">
             <a href="/api/admin-dashboard/" class="btn btn-secondary">Back to Dashboard</a>
         </div>
     </div>
 
-    <!-- Bootstrap JS and Popper (for responsive behavior) -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 
-    <!-- Chart.js Script -->
     <script>
         var courseLabels = {{ course_labels| safe }};
         var averageValues = {{ average_values| safe }};
+        var ratingCounts = {{ rating_counts| safe }};
 
-        var ctx = document.getElementById('feedbackChart').getContext('2d');
-        var feedbackChart = new Chart(ctx, {
+        var ctxBar = document.getElementById('feedbackChart').getContext('2d');
+        var feedbackChart = new Chart(ctxBar, {
             type: 'bar',
             data: {
-                labels: courseLabels,  // Using the variable directly
+                labels: courseLabels,
                 datasets: [{
                     label: 'Average Rating',
-                    data: averageValues,  // Using the variable directly
+                    data: averageValues,
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
@@ -83,6 +92,42 @@
                         max: 5
                     }
                 }
+            }
+        });
+
+        var ctxPie = document.getElementById('ratingPieChart').getContext('2d');
+        var ratingPieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                datasets: [{
+                    label: 'Rating Distribution',
+                    data: [
+                        ratingCounts[1],
+                        ratingCounts[2],
+                        ratingCounts[3],
+                        ratingCounts[4],
+                        ratingCounts[5]
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
             }
         });
     </script>
