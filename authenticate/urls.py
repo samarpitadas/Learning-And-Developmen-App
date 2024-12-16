@@ -12,6 +12,7 @@ urlpatterns = [
     path('submit-request/', views.submit_request, name='submit_request'),
     path('create-course/', views.create_course, name='create_course'),
     path('track-progress/', views.track_progress, name='track_progress'),
+    path('my-progress/',views.my_progress, name='my_progress'),
     path('mark-module-completed/<int:module_id>/', views.mark_module_completed, name='mark_module_completed'),
     path('generate-cred/',views.generate_cred, name='generate_cred'),
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
@@ -29,7 +30,7 @@ urlpatterns = [
     path('submit-feedback/', views.submit_feedback, name='submit_feedback'),
     path('view-feedback/', views.view_feedback, name='view_feedback'),
     path('view-notifications/', views.view_notifications, name='view_notifications'),
-    path('notifications/mark_as_read/<int:course_id>/', views.mark_as_read, name='mark_as_read')
+    path('notifications/mark_as_read/<int:course_id>/', views.mark_as_read, name='mark_as_read'),
 ]
 
 

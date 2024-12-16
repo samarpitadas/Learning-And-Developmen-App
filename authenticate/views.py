@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
-from .forms import SignUpForm
 from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, CourseFeedback
 
 def home(request):
@@ -143,7 +142,7 @@ def create_course(request):
         return render(request, 'authenticate/create_course.html')
 
     return HttpResponseForbidden("Access Denied")
-
+    
 @login_required
 def view_courses(request):
     user_email = request.user.email
@@ -490,3 +489,35 @@ def view_notifications(request):
 
     return render(request, 'authenticate/view_notifications.html', {'courses': accessible_courses})
 
+
+@login_required
+def my_progress(request):
+    # Get the currently logged-in user
+    user = request.user
+
+    # Get all the courses that the user is enrolled in (assuming that `userprofile` has a relation to courses)
+    courses = Course.objects.all()  
+    progress_data = []
+
+    for course in courses:
+        # For each course, get the user's progress
+        total_modules = course.modules.count()
+        completed_modules = course.modules.filter(users_completed=user)
+        completed_count = completed_modules.count()
+
+        # Calculate progress percentage
+        if total_modules > 0:
+            progress_percentage = (completed_count / total_modules) * 100
+        else:
+            progress_percentage = 0
+
+        # Add this course's progress to the progress data list
+        progress_data.append({
+            'course': course,
+            'completed_modules': completed_count,
+            'total_modules': total_modules,
+            'progress_percentage': progress_percentage
+        })
+
+    # Render the progress in the template for the logged-in user
+    return render(request, 'authenticate/my_progress.html', {'progress_data': progress_data})
