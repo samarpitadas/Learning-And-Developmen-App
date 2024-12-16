@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
-from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, UserModuleCompletion, CourseFeedback
+from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, CourseFeedback
 
 def home(request):
     if request.user.is_authenticated:
@@ -155,66 +155,61 @@ def view_courses(request):
 @login_required
 def view_course_details(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    completed_modules = UserModuleCompletion.objects.filter(user=request.user, module__course=course, completed=True).values_list('module', flat=True)
-    
+
+    # Get the modules that are completed by the current user
+    completed_modules = course.modules.filter(is_completed=True)
+
     return render(request, 'authenticate/view_course_details.html', {
         'course': course,
         'completed_modules': completed_modules
     })
 
 @login_required
-def update_module_completion(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+def mark_module_completed(request, module_id):
+    module = get_object_or_404(Module, id=module_id)
+    
+    module.is_completed = not module.is_completed
+    module.save()
+    if module.is_completed:
+        module.users_completed.add(request.user)  
+    else:
+        module.users_completed.remove(request.user)
+    return redirect('view_course_details', course_id=module.course.id) 
 
-    if request.method == 'POST':
-        completed_modules = request.POST.getlist('modules')
-        
-        for module in course.modules.all():
-            completion_status, created = UserModuleCompletion.objects.get_or_create(user=request.user, module=module)
-            if str(module.id) in completed_modules:
-                completion_status.completed = True
-            else:
-                completion_status.completed = False
-            completion_status.save()
-
-    return redirect('view_course_details', course_id=course.id)
 
 @login_required
 def track_progress(request):
-    
-    if request.user.userprofile.role not in ['manager', 'admin']:
-        return HttpResponseForbidden("Access Denied")   
-    employee_emails = request.POST.getlist('employee_emails[]') 
-    courses = Course.objects.all()
+    courses = Course.objects.all()  
     progress_data = []
 
     for course in courses:
-        
-        enrolled_emails = EmployeeEmail.objects.filter(course=course, email__in=employee_emails)
-        enrolled_users = User.objects.filter(id__in=[email.user.id for email in enrolled_emails])
-
         course_progress = []
 
-        for user in enrolled_users:            
-            total_modules = course.modules.count()
-            completed_modules = UserModuleCompletion.objects.filter(user=user, module__course=course, completed=True).count()            
-            progress_percentage = (completed_modules / total_modules) * 100 if total_modules else 0
+        for user in User.objects.all():
+            if user.userprofile.role == 'employee':  
+                total_modules = course.modules.count()
+                completed_modules = course.modules.filter(users_completed=user)
+                completed_count = completed_modules.count()
 
-            course_progress.append({
-                'username': user.username,
-                'completed_modules': completed_modules,
-                'total_modules': total_modules,
-                'progress_percentage': progress_percentage
+                if total_modules > 0:
+                    progress_percentage = (completed_count / total_modules) * 100
+                else:
+                    progress_percentage = 0
+
+                course_progress.append({
+                    'username': user.username,
+                    'completed_modules': completed_count,
+                    'total_modules': total_modules,
+                    'progress_percentage': progress_percentage
+                })
+
+        if course_progress:
+            progress_data.append({
+                'course': course,
+                'course_progress': course_progress
             })
-       
-        progress_data.append({
-            'course': course,
-            'course_progress': course_progress
-        })
 
-    return render(request, 'authenticate/track_progress.html', {
-        'progress_data': progress_data
-    })
+    return render(request, 'authenticate/track_progress.html', {'progress_data': progress_data})
 
 @login_required
 def handle_request(request, request_id):

@@ -10,22 +10,24 @@
         <p>{{ course.description }}</p>
 
         <h5>Modules:</h5>
-        <form method="POST" action="{% url 'update_module_completion' course.id %}">
-            {% csrf_token %}
-            <ul>
-                {% for module in course.modules.all %}
-                    <li>
-                        <strong>{{ module.heading }}</strong>
-                        <p>{{ module.description }}</p>
-                        <input type="checkbox" name="modules" value="{{ module.id }}" {% if module.id in completed_modules %}checked{% endif %}> Completed
-                    </li>
-                {% empty %}
-                    <li>No modules available for this course.</li>
-                {% endfor %}
-            </ul>
+        <ul>
+            {% for module in course.modules.all %}
+                <li>
+                    <strong>{{ module.heading }}</strong>
+                    <p>{{ module.description }}</p>
 
-            <button type="submit" class="btn btn-success">Update Progress</button>
-        </form>
+                    <!-- Form for toggling module completion -->
+                    <form method="POST" action="{% url 'mark_module_completed' module.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">
+                            {% if module.is_completed %} Mark as Incomplete {% else %} Mark as Completed {% endif %}
+                        </button>
+                    </form>
+                </li>
+            {% empty %}
+                <li>No modules available for this course.</li>
+            {% endfor %}
+        </ul>
 
         <p class="text-muted">Created by: {{ course.created_by.username }}</p>
         <p class="text-muted">Date: {{ course.created_at }}</p>

@@ -42,6 +42,8 @@ class Module(models.Model):
     course = models.ForeignKey(Course, related_name="modules", on_delete=models.CASCADE)
     heading = models.CharField(max_length=255)
     description = models.TextField()
+    is_completed = models.BooleanField(default=False)
+    users_completed = models.ManyToManyField(User, related_name='completed_modules', blank=True)  
 
     def __str__(self):
         return self.heading
@@ -52,14 +54,6 @@ class EmployeeEmail(models.Model):
 
     def __str__(self):
         return self.email
-
-class UserModuleCompletion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    module = models.ForeignKey(Module, on_delete=models.CASCADE)
-    completed = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.module.heading} completion"
 
 class CourseFeedback(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
