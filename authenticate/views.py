@@ -500,10 +500,10 @@ def view_notifications(request):
 
 @login_required
 def my_progress(request):
-    # Get the currently logged-in user
+    
     user = request.user
 
-    # Get all the courses that the user is enrolled in (assuming that `userprofile` has a relation to courses)
+    
     courses = Course.objects.all()  
     progress_data = []
 
@@ -520,12 +520,40 @@ def my_progress(request):
             progress_percentage = 0
 
         # Add this course's progress to the progress data list
-        progress_data.append({
+        if(progress_percentage>0):
+            progress_data.append({
             'course': course,
             'completed_modules': completed_count,
             'total_modules': total_modules,
             'progress_percentage': progress_percentage
         })
 
-    # Render the progress in the template for the logged-in user
+    
     return render(request, 'authenticate/my_progress.html', {'progress_data': progress_data})
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+
+@login_required
+def add_employee_emails(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+
+    
+    if request.user.userprofile.role in ['admin'] or request.user == course.created_by:
+        if request.method == 'POST':
+            
+            employee_emails = request.POST.getlist('employee_emails[]')
+            
+            for email in employee_emails:
+                EmployeeEmail.objects.create(
+                    course=course,
+                    email=email
+                )
+
+            messages.success(request, 'Emails added successfully!')
+            return redirect('view_course_details', course_id=course.id)
+
+    else:
+        messages.error(request, "You do not have permission to add emails to this course.")
+        return redirect('view_course_details', course_id=course.id)

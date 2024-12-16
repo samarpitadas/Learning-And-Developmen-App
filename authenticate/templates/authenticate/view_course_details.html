@@ -15,7 +15,6 @@
                 <li>
                     <strong>{{ module.heading }}</strong>
                     <p>{{ module.description }}</p>
-
                     <!-- Form for toggling module completion -->
                     {% if user.userprofile.role == 'employee' %}
                     <form method="POST" action="{% url 'mark_module_completed' module.id %}">
@@ -37,8 +36,44 @@
 
         <p class="text-muted">Created by: {{ course.created_by.username }}</p>
         <p class="text-muted">Date: {{ course.created_at }}</p>
+
+        {% if user.userprofile.role == 'admin' or user == course.created_by %}
+        <!-- Button to trigger email adding form -->
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addEmailModal">
+            Add More Employees
+        </button>
+        {% endif %}
+
+        <!-- Modal for adding emails -->
+        <div class="modal fade" id="addEmailModal" tabindex="-1" aria-labelledby="addEmailModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addEmailModalLabel">Add Employee Emails</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{% url 'add_employee_emails' course.id %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="employee_emails" class="form-label">Employee Emails (comma separated)</label>
+                                <input type="text" name="employee_emails[]" class="form-control" placeholder="email1@example.com, email2@example.com" required>
+                                <small class="form-text text-muted">Separate multiple emails with commas.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Add Emails</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         
+
         <a href="javascript:history.back()" class="btn btn-primary">Back</a>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

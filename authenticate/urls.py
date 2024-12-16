@@ -31,6 +31,7 @@ urlpatterns = [
     path('view-feedback/', views.view_feedback, name='view_feedback'),
     path('view-notifications/', views.view_notifications, name='view_notifications'),
     path('notifications/mark_as_read/<int:course_id>/', views.mark_as_read, name='mark_as_read'),
+    path('course/<int:course_id>/add_emails/', views.add_employee_emails, name='add_employee_emails'),
 ]
 
 
