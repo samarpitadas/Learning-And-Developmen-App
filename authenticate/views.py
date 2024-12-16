@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db import transaction
+from .forms import SignUpForm
 from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, CourseFeedback
 
 def home(request):
@@ -183,6 +184,8 @@ def track_progress(request):
 
     for course in courses:
         course_progress = []
+        usernames = []
+        progress_percentages = []
 
         for user in User.objects.all():
             if user.userprofile.role == 'employee':  
@@ -195,17 +198,22 @@ def track_progress(request):
                 else:
                     progress_percentage = 0
 
-                course_progress.append({
-                    'username': user.username,
-                    'completed_modules': completed_count,
-                    'total_modules': total_modules,
-                    'progress_percentage': progress_percentage
-                })
+                if progress_percentage > 0:
+                    course_progress.append({
+                        'username': user.username,
+                        'completed_modules': completed_count,
+                        'total_modules': total_modules,
+                        'progress_percentage': progress_percentage
+                    })
+                    usernames.append(user.username)
+                    progress_percentages.append(progress_percentage)
 
         if course_progress:
             progress_data.append({
                 'course': course,
-                'course_progress': course_progress
+                'course_progress': course_progress,
+                'usernames': usernames,
+                'progress_percentages': progress_percentages
             })
 
     return render(request, 'authenticate/track_progress.html', {'progress_data': progress_data})
