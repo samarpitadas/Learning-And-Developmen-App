@@ -79,6 +79,10 @@
             font-size: 18px;
             color: #fff;
         }
+        .dash-stat{
+            font-size: 25px;
+            font-weight: bolder;
+        }
     </style>
 </head>
 <body>
@@ -98,7 +102,35 @@
                 <i class="fas fa-user-circle fa-2x mb-3"></i><br>
                 Welcome to Your Dashboard
             </h2>
-
+            <div class="row">
+                <!-- Courses Assigned -->
+                <div class="col-md-4">
+                    <div class="progress-card card">
+                        <div class="card-body text-center">
+                            <h4>Courses Assigned</h4>
+                            <p class="dash-stat">{{ courses_assigned }}</p> 
+                        </div>
+                    </div>
+                </div>
+                <!-- Courses Completed -->
+                <div class="col-md-4">
+                    <div class="progress-card card">
+                        <div class="card-body text-center">
+                            <h4>Courses Completed</h4>
+                            <p class="dash-stat">{{ courses_completed }}</p> 
+                        </div>
+                    </div>
+                </div>
+                <!-- Upcoming Courses -->
+                <div class="col-md-4">
+                    <div class="progress-card card">
+                        <div class="card-body text-center">
+                            <h4>Courses to Start</h4>
+                            <p class="dash-stat">{{ courses_to_start }}</p> 
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="action-card card">

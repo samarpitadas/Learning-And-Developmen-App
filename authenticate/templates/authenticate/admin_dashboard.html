@@ -59,6 +59,10 @@
             color: white;
             transform: translateY(-2px);
         }
+        .dash-stat{
+            font-size: 25px;
+            font-weight: bolder;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +82,38 @@
                 <i class="fas fa-user-circle fa-2x mb-3"></i><br>
                 Welcome to Your Dashboard
             </h2>
+            <!-- Stats boxes -->
+            <div class="row">
+                <!-- Total Users -->
+                <div class="col-md-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Total Users</h4>
+                            <p class="dash-stat">{{ total_users }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Courses -->
+                <div class="col-md-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Total Courses</h4>
+                            <p class="dash-stat">{{ total_courses }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pending Requests -->
+                <div class="col-md-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Pending Requests</h4>
+                            <p class="dash-stat">{{ pending_requests }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Cards -->
             <div class="row">
                 <div class="col-md-6">
                     <div class="action-card card">

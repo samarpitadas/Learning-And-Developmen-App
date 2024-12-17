@@ -557,3 +557,70 @@ def add_employee_emails(request, course_id):
     else:
         messages.error(request, "You do not have permission to add emails to this course.")
         return redirect('view_course_details', course_id=course.id)
+
+
+def admin_dashboard(request):
+    total_users = UserProfile.objects.count()
+
+    total_courses = Course.objects.count()
+
+    pending_requests = ManagerRequest.objects.filter(status='pending').count()
+
+    context = {
+        'total_users': total_users,
+        'total_courses': total_courses,
+        'pending_requests': pending_requests,
+    }
+
+    return render(request, 'authenticate/admin_dashboard.html', context)
+
+def manager_dashboard(request): 
+    total_courses = Course.objects.count()
+
+    approved_requests = ManagerRequest.objects.filter(status='approved').count()
+
+    pending_requests = ManagerRequest.objects.filter(status='pending').count()
+
+    context = {
+        'total_courses': total_courses,
+        'approved_requests': approved_requests,
+        'pending_requests': pending_requests,
+    }
+
+    return render(request, 'authenticate/manager_dashboard.html', context)
+
+def employee_dashboard(request):
+    user_email = request.user.email
+    assigned_courses = Course.objects.filter(employee_emails__email=user_email).count()
+
+    user = request.user
+    courses_100_percent = 0
+    courses_0_percent = 0
+    
+    courses = Course.objects.all()  
+    progress_data = []
+
+    for course in courses:
+        
+        total_modules = course.modules.count()
+        completed_modules = course.modules.filter(users_completed=user)
+        completed_count = completed_modules.count()
+
+        
+        if total_modules > 0:
+            progress_percentage = (completed_count / total_modules) * 100
+        else:
+            progress_percentage = 0
+
+        if progress_percentage == 100:
+            courses_100_percent += 1
+        elif progress_percentage == 0:
+            courses_0_percent += 1
+        
+    context = {
+        'courses_assigned': assigned_courses,
+        'courses_completed': courses_100_percent,
+        'courses_to_start': courses_0_percent,
+    }
+
+    return render(request, 'authenticate/employee_dashboard.html', context)

@@ -18,25 +18,25 @@
             margin-top: 50px;
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
-        .overview-card {
-            background: linear-gradient(45deg, #2e7d32, #388e3c);
+        .stats-card {
+            background: linear-gradient(45deg, #2e7d32, #388e3c); /* Green gradient */
             color: white;
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
             transition: transform 0.3s ease;
         }
-        .overview-card:hover {
+        .stats-card:hover {
             transform: translateY(-5px);
         }
-        .task-card {
+        .action-card {
             border-radius: 15px;
             border: none;
             box-shadow: 0 4px 15px rgba(31, 38, 135, 0.1);
             transition: transform 0.3s ease;
             margin-bottom: 20px;
         }
-        .task-card:hover {
+        .action-card:hover {
             transform: translateY(-5px);
         }
         .navbar {
@@ -59,9 +59,9 @@
             color: white;
             transform: translateY(-2px);
         }
-        .alert {
-            border-radius: 15px;
-            margin-top: 20px;
+        .dash-stat {
+            font-size: 25px;
+            font-weight: bolder;
         }
     </style>
 </head>
@@ -77,17 +77,47 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container">
         <div class="dashboard-container">
             <h2 class="welcome-message text-center" style="color: #388e3c;">
                 <i class="fas fa-user-circle fa-2x mb-3"></i><br>
                 Welcome to Your Dashboard
             </h2>
+            <!-- Stats boxes -->
+            <div class="row">
+                <!-- Total Users -->
+                <div class="col-md-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Total Courses</h4>
+                            <p class="dash-stat">{{ total_courses }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Courses -->
+                <div class="col-md-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Approved Requests</h4>
+                            <p class="dash-stat">{{ approved_requests }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pending Requests -->
+                <div class="col-md-4">
+                    <div class="stats-card card">
+                        <div class="card-body text-center">
+                            <h4>Pending Requests</h4>
+                            <p class="dash-stat">{{ pending_requests }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Cards -->
             <div class="row">
                 <div class="col-md-6">
-                    <div class="task-card card">
+                    <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-clipboard-list fa-3x mb-3 text-success"></i>
                             <h4>View Requests</h4>
@@ -99,7 +129,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="task-card card">
+                    <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-chart-bar fa-3x mb-3 text-success"></i>
                             <h4>Performance Tracking</h4>
@@ -111,7 +141,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="task-card card">
+                    <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-graduation-cap fa-3x mb-3 text-success"></i>
                             <h4>Course Management</h4>
@@ -123,7 +153,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="task-card card">
+                    <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-paper-plane fa-3x mb-3 text-success"></i>
                             <h4>Submit Request</h4>
@@ -135,7 +165,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="task-card card">
+                    <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-comments fa-3x mb-3 text-success"></i>
                             <h4>View Feedback</h4>
@@ -149,7 +179,5 @@
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
