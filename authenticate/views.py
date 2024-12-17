@@ -616,11 +616,18 @@ def employee_dashboard(request):
             courses_100_percent += 1
         elif progress_percentage == 0:
             courses_0_percent += 1
+
+    user_email = request.user.email
+    unread_notifications_count = Course.objects.filter(
+        employee_emails__email=user_email,
+        is_read=False
+    ).count()
         
     context = {
         'courses_assigned': assigned_courses,
         'courses_completed': courses_100_percent,
         'courses_to_start': courses_0_percent,
+        'unread_notifications_count': unread_notifications_count,
     }
 
     return render(request, 'authenticate/employee_dashboard.html', context)
