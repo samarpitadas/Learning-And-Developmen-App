@@ -16,6 +16,7 @@ class CustomUserAdmin(UserAdmin):
         return obj.userprofile.role
     get_role.short_description = 'Role'
 
+
 class ManagerRequestAdmin(admin.ModelAdmin):
     list_display = ('title', 'manager', 'status', 'created_at')
     list_filter = ('status', 'created_at')
