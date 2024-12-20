@@ -631,3 +631,39 @@ def employee_dashboard(request):
     }
 
     return render(request, 'authenticate/employee_dashboard.html', context)
+
+from django.core.mail import send_mail
+from django.conf import settings
+
+def create_notification(user, message):
+    # Create the in-app notification
+    Notification.objects.create(user=user, message=message)
+
+    # Send email notification
+    send_mail(
+        subject="New Notification",
+        message=f"Hello {user.first_name},\n\n{message}",
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[user.email],
+        fail_silently=False,  # Set to True if you don't want errors to stop execution
+    )
+
+@login_required
+def create_course_notification(request):
+    if request.method == "POST":
+        course_title = request.POST.get("course_title")
+        employee_emails = request.POST.getlist("employee_emails")  # Assume it's a list of emails from a form
+
+        # Create the course
+        course = Course.objects.create(title=course_title, is_read=False)
+
+        # Notify employees
+        for email in employee_emails:
+            user = User.objects.filter(email=email).first()  # Ensure the user exists
+            if user:
+                create_notification(
+                    user=user,
+                    message=f"A new course '{course_title}' has been added. Please check your notifications."
+                )
+
+        return redirect('view_notifications')
