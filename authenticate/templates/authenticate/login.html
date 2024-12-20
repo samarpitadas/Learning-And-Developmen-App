@@ -28,10 +28,12 @@
             padding: 12px 20px;
             margin-bottom: 20px;
             border: 2px solid #e8f5e9;
+            color: rgb(110,117,124);
         }
         .form-control:focus {
             border-color: #2e7d32;
             box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+            
         }
         .btn-login {
             background: #2e7d32;
@@ -95,6 +97,17 @@
                             <i class="fas fa-lock"></i>
                             <input type="password" name="password" class="form-control" placeholder="Password" required>
                         </div>
+                        <div class="input-group">
+                            <i class="fas fa-briefcase"></i>
+                            <!-- Role dropdown initially shows 'Select Role' -->
+                            <select id="roleSelect" name="role" class="form-control" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <!-- Roles will be shown when dropdown is clicked -->
+                                <option value="employee">Employee</option>
+                                <option value="manager">Manager</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-login">
                             <i class="fas fa-sign-in-alt me-2"></i>Login
                         </button>
@@ -106,5 +119,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // JavaScript to handle role selection
+        const roleSelect = document.getElementById('roleSelect');
+        
+        // Initially show the 'Select Role' option
+        roleSelect.addEventListener('focus', function() {
+            if (roleSelect.value === '') {
+                roleSelect.classList.add('selected-role');
+            }
+        });
+        
+        roleSelect.addEventListener('blur', function() {
+            if (roleSelect.value === '') {
+                roleSelect.classList.remove('selected-role');
+            }
+        });
+    </script>
 </body>
 </html>
