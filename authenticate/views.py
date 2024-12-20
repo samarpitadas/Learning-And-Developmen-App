@@ -6,6 +6,8 @@ from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
 from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, CourseFeedback
+from django.core.mail import send_mail
+from django.conf import settings
 
 def home(request):
     if request.user.is_authenticated:
@@ -109,19 +111,20 @@ def submit_request(request):
 
 @login_required
 def create_course(request):
-    if request.user.userprofile.role in ['admin']:
+    if request.user.userprofile.role in ['admin']:  # Only admins can create courses
         if request.method == 'POST':
+            # Step 1: Create the course
             course = Course.objects.create(
                 title=request.POST['title'],
                 description=request.POST['description'],
                 created_by=request.user
             )
 
-            # Get the module data from the POST request
+            # Step 2: Get the module data from the POST request
             module_headings = request.POST.getlist('module_heading[]')
             module_descriptions = request.POST.getlist('module_description[]')
 
-            # Create Modules for the Course
+            # Step 3: Create Modules for the Course
             for heading, description in zip(module_headings, module_descriptions):
                 Module.objects.create(
                     course=course,
@@ -129,14 +132,20 @@ def create_course(request):
                     description=description
                 )
 
+            # Step 4: Get the list of employee emails and associate them with the course
             employee_emails = request.POST.getlist('employee_emails[]')
 
             for email in employee_emails:
+                # Create EmployeeEmail association
                 EmployeeEmail.objects.create(
                     course=course,
                     email=email
                 )
+                
+                # Step 5: Send email notification to the employee
+                send_course_notification_email(course, email)
 
+            # Step 6: Display a success message and redirect
             messages.success(request, 'Course created successfully and notifications sent!')
             return redirect('admin_dashboard')
 
@@ -631,3 +640,22 @@ def employee_dashboard(request):
     }
 
     return render(request, 'authenticate/employee_dashboard.html', context)
+
+
+
+def send_course_notification_email(course, email):
+    subject = f"New Course Assigned: {course.title}"
+    message = f"""
+    Hello,
+
+    You have been assigned a new course: {course.title}.
+
+    Description:
+    {course.description}
+
+    Please log in to your account to view the course details.
+    """
+    from_email = settings.EMAIL_HOST_USER  # The email from which you are sending
+    recipient_list = [email]  # The recipient's email address (the employee)
+
+    send_mail(subject, message, from_email, recipient_list)
