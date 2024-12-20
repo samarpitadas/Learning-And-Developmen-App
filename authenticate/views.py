@@ -141,9 +141,6 @@ def create_course(request):
                     course=course,
                     email=email
                 )
-                
-                # Step 5: Send email notification to the employee
-                send_course_notification_email(course, email)
 
             # Step 6: Display a success message and redirect
             messages.success(request, 'Course created successfully and notifications sent!')
@@ -483,14 +480,45 @@ def view_feedback(request):
         'rating_counts': rating_counts
     })
 
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Course  # Adjust this based on your actual model location
+
 @login_required
 def mark_as_read(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
+    # Mark the course as read
     course.is_read = True
     course.save()
 
-    return redirect('view_notifications')  
+    return redirect('view_notifications')
+
+
+def send_course_assigned_email(course):
+    # Assuming `employee_emails` is a ManyToManyField on the Course model
+    # that links to a User model, and that each User has an 'email' field.
+    for user in course.employee_emails.all():  # Iterate over all related users
+        user_email = user.email  # Access the email of each related user
+
+        subject = 'New Course Assigned to You'
+        message = render_to_string('authenticate/course_assigned_email.html', {
+            'course_title': course.title,  # Use 'title' instead of 'name'
+            'course_description': course.description,  # Use 'description'
+            'user_email': user_email,
+        })
+
+        send_mail(
+            subject,
+            message,
+            settings.EMAIL_HOST_USER,  # Sender email
+            [user_email],  # Recipient email
+            fail_silently=False,
+        )
 
 def view_notifications(request):
     user_email = request.user.email
@@ -606,7 +634,7 @@ def employee_dashboard(request):
     courses_100_percent = 0
     courses_0_percent = 0
     
-    courses = Course.objects.all()  
+    courses = Course.objects.filter(employee_emails__email=user_email) 
     progress_data = []
 
     for course in courses:
@@ -640,60 +668,3 @@ def employee_dashboard(request):
     }
 
     return render(request, 'authenticate/employee_dashboard.html', context)
-
-<<<<<<< HEAD
-
-
-def send_course_notification_email(course, email):
-    subject = f"New Course Assigned: {course.title}"
-    message = f"""
-    Hello,
-
-    You have been assigned a new course: {course.title}.
-
-    Description:
-    {course.description}
-
-    Please log in to your account to view the course details.
-    """
-    from_email = settings.EMAIL_HOST_USER  # The email from which you are sending
-    recipient_list = [email]  # The recipient's email address (the employee)
-
-    send_mail(subject, message, from_email, recipient_list)
-=======
-from django.core.mail import send_mail
-from django.conf import settings
-
-def create_notification(user, message):
-    # Create the in-app notification
-    Notification.objects.create(user=user, message=message)
-
-    # Send email notification
-    send_mail(
-        subject="New Notification",
-        message=f"Hello {user.first_name},\n\n{message}",
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[user.email],
-        fail_silently=False,  # Set to True if you don't want errors to stop execution
-    )
-
-@login_required
-def create_course_notification(request):
-    if request.method == "POST":
-        course_title = request.POST.get("course_title")
-        employee_emails = request.POST.getlist("employee_emails")  # Assume it's a list of emails from a form
-
-        # Create the course
-        course = Course.objects.create(title=course_title, is_read=False)
-
-        # Notify employees
-        for email in employee_emails:
-            user = User.objects.filter(email=email).first()  # Ensure the user exists
-            if user:
-                create_notification(
-                    user=user,
-                    message=f"A new course '{course_title}' has been added. Please check your notifications."
-                )
-
-        return redirect('view_notifications')
->>>>>>> 8fa57de55d977eca400e9cfa48adc09b05d8701a
