@@ -113,11 +113,12 @@ def submit_request(request):
 def create_course(request):
     if request.user.userprofile.role in ['admin']:  # Only admins can create courses
         if request.method == 'POST':
-            # Step 1: Create the course
+            # Step 1: Create the course, including the deadline
             course = Course.objects.create(
                 title=request.POST['title'],
                 description=request.POST['description'],
-                created_by=request.user
+                created_by=request.user,
+                deadline=request.POST['deadline']  # Handle the deadline field
             )
 
             # Step 2: Get the module data from the POST request

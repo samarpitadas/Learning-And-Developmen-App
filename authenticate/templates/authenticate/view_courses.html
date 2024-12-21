@@ -20,6 +20,7 @@
 
                         <p class="text-muted">Created by: {{ course.created_by.username }}</p>
                         <p class="text-muted">Date: {{ course.created_at }}</p>
+                        <p class="text-muted">Deadline: {{ course.deadline }}</p>
                         <a href="{% url 'view_course_details' course.id %}" class="btn btn-primary">View Details</a>
                         {% if user.userprofile.role == 'admin' %}
                         <a href="/api/delete-course/{{ course.id }}/" class="btn btn-danger">Delete Course</a>

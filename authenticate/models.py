@@ -34,7 +34,7 @@ class Course(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
-
+    deadline = models.DateField(null=True)  
     def __str__(self):
         return f"{self.title} - Created by {self.created_by.username}"
 
