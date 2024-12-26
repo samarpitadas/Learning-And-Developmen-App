@@ -423,32 +423,55 @@ def generate_cred(request):
 def submit_feedback(request):
     if request.method == 'POST':
         if request.user.userprofile.role == 'employee':
-            
             course_name = request.POST['course_name']
             feedback = request.POST['feedback']
             rating = request.POST.get('rating')  # Get the rating value (1-5)
 
-            
             if rating:
-                rating = int(rating)  
+                rating = int(rating)
             else:
-                rating = None  
+                rating = None
 
-            
+            # Check if the user is assigned to the course
+            user_email = request.user.email
+            course = Course.objects.filter(title=course_name, employee_emails__email=user_email).first()
+
+            if not course:
+                messages.error(request, "You are not assigned to this course. You cannot submit feedback.")
+                return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
+
+            # Check if the user has 100% completion of the course
+            total_modules = course.modules.count()
+            completed_modules = course.modules.filter(users_completed=request.user).count()
+
+            if total_modules == 0:
+                messages.error(request, "No modules found for this course.")
+                return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
+
+            progress_percentage = (completed_modules / total_modules) * 100
+
+            if progress_percentage < 100:
+                messages.error(request, "You must complete 100% of the course to submit feedback.")
+                return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
+
+            # Create feedback if all conditions are met
             CourseFeedback.objects.create(
                 user=request.user,
                 course_name=course_name,
                 feedback=feedback,
-                rating=rating  
+                rating=rating
             )
 
             messages.success(request, 'Feedback submitted successfully!')
-            return redirect('employee_dashboard')
+            return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page after success
+
         else:
             messages.error(request, 'You are not authorized to submit feedback.')
-            return redirect('employee_dashboard')
+            return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
 
     return render(request, 'authenticate/submit_feedback.html')
+
+
 
 @login_required
 def view_feedback(request):
@@ -501,8 +524,7 @@ def mark_as_read(request, course_id):
 
 
 def send_course_assigned_email(course):
-    # Assuming `employee_emails` is a ManyToManyField on the Course model
-    # that links to a User model, and that each User has an 'email' field.
+
     for user in course.employee_emails.all():  # Iterate over all related users
         user_email = user.email  # Access the email of each related user
 

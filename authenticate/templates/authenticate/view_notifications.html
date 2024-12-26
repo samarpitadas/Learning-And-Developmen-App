@@ -53,8 +53,8 @@
                             <div class="notification-item {% if not course.is_read %}unread{% endif %}">
                                 <h5>You have been assigned a new course!</h5>
                                 <p><strong>Assigned Course:</strong> {{ course.title }}</p>
+                                <p><strong>Deadline:</strong> {{ course.deadline }}</p>
                                 <p class="text-muted"><strong>Date:</strong> {{ course.created_at }}</p>
-
                                 {% if not course.is_read %}
                                     <a href="{% url 'mark_as_read' course.id %}" class="btn btn-success btn-sm">Mark as Read</a>
                                 {% endif %}
