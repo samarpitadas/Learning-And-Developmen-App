@@ -6,8 +6,6 @@ from django.http import HttpResponseForbidden
 from django.db import transaction
 from .forms import SignUpForm
 from .models import UserProfile, Course, Request, ManagerRequest, Module, EmployeeEmail, CourseFeedback
-from django.core.mail import send_mail
-from django.conf import settings
 
 def home(request):
     if request.user.is_authenticated:
@@ -108,24 +106,67 @@ def submit_request(request):
             messages.success(request, 'Request submitted successfully!')
             return redirect('employee_dashboard')
     return render(request, 'authenticate/submit_request.html')
+#this is change i was doin here to send the email when the course is created
+
+# @login_required
+# def create_course(request):
+#     if request.user.userprofile.role in ['admin']:
+#         if request.method == 'POST':
+#             course = Course.objects.create(
+#                 title=request.POST['title'],
+#                 description=request.POST['description'],
+#                 created_by=request.user
+#             )
+
+#             # Get the module data from the POST request
+#             module_headings = request.POST.getlist('module_heading[]')
+#             module_descriptions = request.POST.getlist('module_description[]')
+
+#             # Create Modules for the Course
+#             for heading, description in zip(module_headings, module_descriptions):
+#                 Module.objects.create(
+#                     course=course,
+#                     heading=heading,
+#                     description=description
+#                 )
+
+#             employee_emails = request.POST.getlist('employee_emails[]')
+
+#             for email in employee_emails:
+#                 EmployeeEmail.objects.create(
+#                     course=course,
+#                     email=email
+#                 )
+
+#             messages.success(request, 'Course created successfully and notifications sent!')
+#             return redirect('admin_dashboard')
+
+#         return render(request, 'authenticate/create_course.html')
+
+#     return HttpResponseForbidden("Access Denied")
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 
 @login_required
 def create_course(request):
-    if request.user.userprofile.role in ['admin']:  # Only admins can create courses
+    if request.user.userprofile.role in ['admin']:
         if request.method == 'POST':
-            # Step 1: Create the course, including the deadline
+            # Create the course
             course = Course.objects.create(
                 title=request.POST['title'],
                 description=request.POST['description'],
-                created_by=request.user,
-                deadline=request.POST['deadline']  # Handle the deadline field
+                created_by=request.user
             )
 
-            # Step 2: Get the module data from the POST request
+            # Get the module data from the POST request
             module_headings = request.POST.getlist('module_heading[]')
             module_descriptions = request.POST.getlist('module_description[]')
 
-            # Step 3: Create Modules for the Course
+            # Create modules for the course
             for heading, description in zip(module_headings, module_descriptions):
                 Module.objects.create(
                     course=course,
@@ -133,23 +174,67 @@ def create_course(request):
                     description=description
                 )
 
-            # Step 4: Get the list of employee emails and associate them with the course
+            # Get employee emails from the POST request
             employee_emails = request.POST.getlist('employee_emails[]')
 
-            for email in employee_emails:
-                # Create EmployeeEmail association
-                EmployeeEmail.objects.create(
-                    course=course,
-                    email=email
-                )
+            # Prepare the email subject and body
+            subject = "New Course Assigned"
+            body_template = """
+                <html>
+                <body>
+                    <p>Hello Employee,</p>
+                    <p>You have been assigned a new course titled <strong>{{ course_title }}</strong>.</p>
+                    <p>Please login to the platform to view the details.</p>
+                    <p>Thank you!</p>
+                </body>
+                </html>
+            """
 
-            # Step 6: Display a success message and redirect
-            messages.success(request, 'Course created successfully and notifications sent!')
+            # Send email notifications
+            for email in employee_emails:
+                # Save to the database
+                EmployeeEmail.objects.create(course=course, email=email)
+
+                # Render the email body
+                body = body_template.replace("{{ course_title }}", course.title)
+
+                # Send the email
+                send_email(receiver_email=email, subject=subject, body=body)
+
+            messages.success(request, 'Course created successfully, and notifications sent!')
             return redirect('admin_dashboard')
 
         return render(request, 'authenticate/create_course.html')
 
     return HttpResponseForbidden("Access Denied")
+
+def send_email(receiver_email, subject, body, attachment=None, filename=None):
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    sender_email = 'elevateu034@gmail.com'
+    app_password = 'xxya yxlt nfbc qmbc'
+
+    # Create the email message
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = receiver_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, "html"))
+
+    # Attach a file if provided
+    if attachment:
+        part = MIMEApplication(attachment.read(), _subtype="octet-stream")
+        part.add_header("Content-Disposition", f"attachment; filename={filename}")
+        message.attach(part)
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, app_password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+    finally:
+        server.quit()
+
     
 @login_required
 def view_courses(request):
@@ -371,6 +456,57 @@ def my_progress_view(request):
     return render(request, 'authenticate/progress.html', context)
 
 
+# from django.contrib.auth.models import User
+# from django.http import JsonResponse
+# from django.shortcuts import render
+# from django.contrib.auth.decorators import login_required
+# from django.core.exceptions import ObjectDoesNotExist
+# import random
+# import string
+# from authenticate.models import UserProfile
+
+# @login_required
+# def generate_cred(request):
+#     if request.user.userprofile.role != 'admin':
+#         return HttpResponseForbidden("Access Denied")
+
+#     if request.method == 'POST':
+#         first_name = request.POST.get('first_name', 'Employee')
+#         last_name = request.POST.get('last_name', 'User')
+#         email = request.POST.get('email', '').strip()
+
+#         if User.objects.filter(email=email).exists():
+#             return JsonResponse({'error': 'Email is already taken. Please try another one.'}, status=400)
+
+
+#         username = f"{first_name.lower()}.{last_name.lower()}{random.randint(100, 999)}"
+#         password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
+
+#         user = User.objects.create_user(
+#             username=username,
+#             password=password,
+#             first_name=first_name,
+#             last_name=last_name,
+#             email=email
+#         )
+
+#         try:
+#             user_profile = UserProfile.objects.get(user=user)
+            
+#         except ObjectDoesNotExist:
+           
+#             UserProfile.objects.create(user=user, role='employee')
+
+       
+#         return JsonResponse({'username': username, 'password': password})
+
+#     return render(request, 'authenticate/generate_cred.html')
+
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -380,24 +516,54 @@ import random
 import string
 from authenticate.models import UserProfile
 
+
+def send_email(receiver_email, subject, body, attachment=None, filename=None):
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    sender_email = 'elevateu034@gmail.com'
+    app_password = 'xxya yxlt nfbc qmbc'
+
+    # Create the email message
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = receiver_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, "html"))
+
+    # Attach a file if provided
+    if attachment:
+        part = MIMEApplication(attachment.read(), _subtype="octet-stream")
+        part.add_header("Content-Disposition", f"attachment; filename={filename}")
+        message.attach(part)
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, app_password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+    finally:
+        server.quit()
+
+
 @login_required
 def generate_cred(request):
     if request.user.userprofile.role != 'admin':
-        return HttpResponseForbidden("Access Denied")
+        return JsonResponse({'error': "Access Denied"}, status=403)
 
     if request.method == 'POST':
         first_name = request.POST.get('first_name', 'Employee')
         last_name = request.POST.get('last_name', 'User')
         email = request.POST.get('email', '').strip()
 
+        # Check if email already exists
         if User.objects.filter(email=email).exists():
             return JsonResponse({'error': 'Email is already taken. Please try another one.'}, status=400)
 
-
+        # Generate username and password
         username = f"{first_name.lower()}.{last_name.lower()}{random.randint(100, 999)}"
         password = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
-
+        # Create the user
         user = User.objects.create_user(
             username=username,
             password=password,
@@ -406,72 +572,107 @@ def generate_cred(request):
             email=email
         )
 
+        # Create or get the UserProfile
         try:
             user_profile = UserProfile.objects.get(user=user)
-            
         except ObjectDoesNotExist:
-           
             UserProfile.objects.create(user=user, role='employee')
 
-       
+        # Prepare email message
+        subject = "Your Account Credentials"
+        body = f"""
+        <html>
+        <body>
+            <h2>Hello {first_name},</h2>
+            <p>Your account has been successfully created. Here are your login details:</p>
+            <ul>
+                <li><strong>Username:</strong> {username}</li>
+                <li><strong>Password:</strong> {password}</li>
+            </ul>
+            <p>Please log in and change your password as soon as possible.</p>
+            <br>
+            <p>Thank you!</p>
+        </body>
+        </html>
+        """
+
+        # Send email
+        try:
+            send_credentials_email(receiver_email=email, subject=subject, body=body)
+        except Exception as e:
+            return JsonResponse({'error': f"Failed to send email: {str(e)}"}, status=500)
+
+        # Respond with credentials (optional, for admin verification)
         return JsonResponse({'username': username, 'password': password})
 
+    # Render the HTML form for GET requests
     return render(request, 'authenticate/generate_cred.html')
+
+
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+
+def send_credentials_email(receiver_email, subject, body, attachment=None, filename=None):
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    sender_email = 'elevateu034@gmail.com'
+    app_password = 'xxya yxlt nfbc qmbc'
+
+    # Create the email message
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = receiver_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, "html"))
+
+    # Attach a file if provided
+    if attachment:
+        part = MIMEApplication(attachment.read(), _subtype="octet-stream")
+        part.add_header("Content-Disposition", f"attachment; filename={filename}")
+        message.attach(part)
+
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, app_password)
+        server.sendmail(sender_email, receiver_email, message.as_string())
+    finally:
+        server.quit()
+
+
 
 
 @login_required
 def submit_feedback(request):
     if request.method == 'POST':
         if request.user.userprofile.role == 'employee':
+            
             course_name = request.POST['course_name']
             feedback = request.POST['feedback']
             rating = request.POST.get('rating')  # Get the rating value (1-5)
 
+            
             if rating:
-                rating = int(rating)
+                rating = int(rating)  
             else:
-                rating = None
+                rating = None  
 
-            # Check if the user is assigned to the course
-            user_email = request.user.email
-            course = Course.objects.filter(title=course_name, employee_emails__email=user_email).first()
-
-            if not course:
-                messages.error(request, "You are not assigned to this course. You cannot submit feedback.")
-                return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
-
-            # Check if the user has 100% completion of the course
-            total_modules = course.modules.count()
-            completed_modules = course.modules.filter(users_completed=request.user).count()
-
-            if total_modules == 0:
-                messages.error(request, "No modules found for this course.")
-                return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
-
-            progress_percentage = (completed_modules / total_modules) * 100
-
-            if progress_percentage < 100:
-                messages.error(request, "You must complete 100% of the course to submit feedback.")
-                return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
-
-            # Create feedback if all conditions are met
+            
             CourseFeedback.objects.create(
                 user=request.user,
                 course_name=course_name,
                 feedback=feedback,
-                rating=rating
+                rating=rating  
             )
 
             messages.success(request, 'Feedback submitted successfully!')
-            return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page after success
-
+            return redirect('employee_dashboard')
         else:
             messages.error(request, 'You are not authorized to submit feedback.')
-            return render(request, 'authenticate/submit_feedback.html')  # Stay on the same page and show error
+            return redirect('employee_dashboard')
 
     return render(request, 'authenticate/submit_feedback.html')
-
-
 
 @login_required
 def view_feedback(request):
@@ -504,44 +705,14 @@ def view_feedback(request):
         'rating_counts': rating_counts
     })
 
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from django.conf import settings
-from django.template.loader import render_to_string
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Course  # Adjust this based on your actual model location
-
 @login_required
 def mark_as_read(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
-    # Mark the course as read
     course.is_read = True
     course.save()
 
-    return redirect('view_notifications')
-
-
-def send_course_assigned_email(course):
-
-    for user in course.employee_emails.all():  # Iterate over all related users
-        user_email = user.email  # Access the email of each related user
-
-        subject = 'New Course Assigned to You'
-        message = render_to_string('authenticate/course_assigned_email.html', {
-            'course_title': course.title,  # Use 'title' instead of 'name'
-            'course_description': course.description,  # Use 'description'
-            'user_email': user_email,
-        })
-
-        send_mail(
-            subject,
-            message,
-            settings.EMAIL_HOST_USER,  # Sender email
-            [user_email],  # Recipient email
-            fail_silently=False,
-        )
+    return redirect('view_notifications')  
 
 def view_notifications(request):
     user_email = request.user.email
@@ -592,29 +763,78 @@ def my_progress(request):
     return render(request, 'authenticate/my_progress.html', {'progress_data': progress_data})
 
 
+# from django.shortcuts import get_object_or_404, redirect
+# from django.contrib import messages
+
+# @login_required
+# def add_employee_emails(request, course_id):
+#     course = get_object_or_404(Course, id=course_id)
+
+    
+#     if request.user.userprofile.role in ['admin'] or request.user == course.created_by:
+#         if request.method == 'POST':
+            
+#             employee_emails = request.POST.getlist('employee_emails[]')
+            
+#             for email in employee_emails:
+#                 EmployeeEmail.objects.create(
+#                     course=course,
+#                     email=email
+#                 )
+
+#             messages.success(request, 'Emails added successfully!')
+#             return redirect('view_course_details', course_id=course.id)
+
+#     else:
+#         messages.error(request, "You do not have permission to add emails to this course.")
+#         return redirect('view_course_details', course_id=course.id)
+
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 @login_required
 def add_employee_emails(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
-    
     if request.user.userprofile.role in ['admin'] or request.user == course.created_by:
         if request.method == 'POST':
-            
+            # Retrieve employee emails from the POST request
             employee_emails = request.POST.getlist('employee_emails[]')
-            
+
+            # Prepare the email content
+            subject = "You Have Been Assigned to a Course"
+            body_template = """
+                <html>
+                <body>
+                    <p>Hello,</p>
+                    <p>You have been added to the course titled <strong>{{ course_title }}</strong>.</p>
+                    <p>Please login to the platform to access the course details.</p>
+                    <p>Thank you!</p>
+                </body>
+                </html>
+            """
+
+            # Process each email
             for email in employee_emails:
+                # Add the email to the database
                 EmployeeEmail.objects.create(
                     course=course,
                     email=email
                 )
 
-            messages.success(request, 'Emails added successfully!')
+                # Customize the email body with the course title
+                body = body_template.replace("{{ course_title }}", course.title)
+
+                # Send the notification email
+                send_email(receiver_email=email, subject=subject, body=body)
+
+            # Add a success message
+            messages.success(request, 'Emails added successfully, and notifications sent!')
             return redirect('view_course_details', course_id=course.id)
 
     else:
+        # Add an error message for unauthorized access
         messages.error(request, "You do not have permission to add emails to this course.")
         return redirect('view_course_details', course_id=course.id)
 
