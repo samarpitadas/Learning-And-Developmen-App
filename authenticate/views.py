@@ -159,19 +159,22 @@ def create_course(request):
             course = Course.objects.create(
                 title=request.POST['title'],
                 description=request.POST['description'],
-                created_by=request.user
+                created_by=request.user,
+                deadline=request.POST.get('deadline')
             )
 
             # Get the module data from the POST request
             module_headings = request.POST.getlist('module_heading[]')
             module_descriptions = request.POST.getlist('module_description[]')
+            deadline = request.POST.get('deadline')
 
             # Create modules for the course
-            for heading, description in zip(module_headings, module_descriptions):
+            for heading, description, deadline in zip(module_headings, module_descriptions, deadline):
                 Module.objects.create(
                     course=course,
                     heading=heading,
-                    description=description
+                    description=description,
+                    
                 )
 
             # Get employee emails from the POST request
