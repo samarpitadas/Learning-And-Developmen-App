@@ -589,9 +589,9 @@ def generate_cred(request):
                 <li><strong>Username:</strong> {username}</li>
                 <li><strong>Password:</strong> {password}</li>
             </ul>
-            <p>Please log in and change your password as soon as possible.</p>
             <br>
             <p>Thank you!</p>
+            <p>Best regards,<br> ElevateU Team</p>
         </body>
         </html>
         """
@@ -647,23 +647,34 @@ def send_credentials_email(receiver_email, subject, body, attachment=None, filen
 def submit_feedback(request):
     if request.method == 'POST':
         if request.user.userprofile.role == 'employee':
-            
-            course_name = request.POST['course_name']
+            course_title = request.POST['course_name']
             feedback = request.POST['feedback']
             rating = request.POST.get('rating')  # Get the rating value (1-5)
 
-            
-            if rating:
-                rating = int(rating)  
-            else:
-                rating = None  
+            # Ensure rating is an integer or set to None if not provided
+            rating = int(rating) if rating else None
 
-            
+            # Fetch the course object by title
+            try:
+                course = Course.objects.get(title=course_title)
+            except Course.DoesNotExist:
+                messages.error(request, 'Course does not exist.')
+                return redirect('employee_dashboard')
+
+            # Check if the user has completed 100% of the course
+            total_modules = course.modules.count()  # Assume the course has a `modules` relationship
+            completed_modules = course.modules.filter(users_completed=request.user).count()
+
+            if total_modules == 0 or completed_modules < total_modules:
+                messages.error(request, 'You must complete the course 100% before submitting feedback.')
+                return redirect('employee_dashboard')
+
+            # Save the feedback if conditions are met
             CourseFeedback.objects.create(
                 user=request.user,
-                course_name=course_name,
+                course_name=course_title,
                 feedback=feedback,
-                rating=rating  
+                rating=rating
             )
 
             messages.success(request, 'Feedback submitted successfully!')
@@ -811,6 +822,7 @@ def add_employee_emails(request, course_id):
                     <p>You have been added to the course titled <strong>{{ course_title }}</strong>.</p>
                     <p>Please login to the platform to access the course details.</p>
                     <p>Thank you!</p>
+                    <p>Best regards,<br> ElevateU Team</p>
                 </body>
                 </html>
             """
