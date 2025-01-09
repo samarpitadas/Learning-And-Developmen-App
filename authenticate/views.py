@@ -659,7 +659,12 @@ def submit_feedback(request):
                 course = Course.objects.get(title=course_title)
             except Course.DoesNotExist:
                 messages.error(request, 'Course does not exist.')
-                return redirect('employee_dashboard')
+                return render(request, 'authenticate/submit_feedback.html')
+
+            # Check if the course is assigned to the employee by email
+            if not course.employee_emails.filter(email=request.user.email).exists():
+                messages.error(request, 'You are not assigned to this course.')
+                return render(request, 'authenticate/submit_feedback.html')
 
             # Check if the user has completed 100% of the course
             total_modules = course.modules.count()  # Assume the course has a `modules` relationship
@@ -667,7 +672,7 @@ def submit_feedback(request):
 
             if total_modules == 0 or completed_modules < total_modules:
                 messages.error(request, 'You must complete the course 100% before submitting feedback.')
-                return redirect('employee_dashboard')
+                return render(request, 'authenticate/submit_feedback.html')
 
             # Save the feedback if conditions are met
             CourseFeedback.objects.create(
@@ -678,10 +683,10 @@ def submit_feedback(request):
             )
 
             messages.success(request, 'Feedback submitted successfully!')
-            return redirect('employee_dashboard')
+            return render(request, 'authenticate/submit_feedback.html')
         else:
             messages.error(request, 'You are not authorized to submit feedback.')
-            return redirect('employee_dashboard')
+            return render(request, 'authenticate/submit_feedback.html')
 
     return render(request, 'authenticate/submit_feedback.html')
 
