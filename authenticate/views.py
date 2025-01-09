@@ -35,7 +35,7 @@ def login_user(request):
 def logout_user(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
-    return redirect('login')
+    return redirect('home')
 
 def register_user(request):
     if request.method == 'POST':
@@ -641,8 +641,6 @@ def send_credentials_email(receiver_email, subject, body, attachment=None, filen
         server.quit()
 
 
-
-
 @login_required
 def submit_feedback(request):
     if request.method == 'POST':
@@ -689,6 +687,7 @@ def submit_feedback(request):
             return render(request, 'authenticate/submit_feedback.html')
 
     return render(request, 'authenticate/submit_feedback.html')
+
 
 @login_required
 def view_feedback(request):
