@@ -64,7 +64,6 @@
             margin-bottom: 30px;
             text-align: center;
         }
-        /* Style for the red dot */
         .notification-bell {
             position: relative;
         }
@@ -79,11 +78,46 @@
             font-size: 18px;
             color: #fff;
         }
-        .dash-stat{
+        .dash-stat {
             font-size: 25px;
             font-weight: bolder;
         }
+        /* Dark Theme */
+        .dark-theme {
+            background: #121212;
+            color: #e0e0e0;
+        }
+        .dark-theme .dashboard-container {
+            background: rgba(48, 48, 48, 0.95);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        .dark-theme .progress-card {
+            background: linear-gradient(45deg, #004d40, #00796b);
+        }
+        .dark-theme .action-card {
+            background: #1e1e1e;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+        }
+        #theme-toggle-btn {
+            transition: all 0.3s ease;
+        }
+        #theme-toggle-btn:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #theme-toggle-btn i {
+            color: white;
+        }
+        #theme-toggle-btn:hover i {
+            color: #00796b;
+        }
     </style>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
@@ -92,6 +126,9 @@
             <div class="navbar-nav ms-auto">
                 <span class="nav-link">Welcome, {{ user.username }}</span>
                 <a class="nav-link" href="/api/logout/">Logout</a>
+                <button style="border: none;" onclick="toggleTheme()" class="btn btn-outline-light ms-3" id="theme-toggle-btn">
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -103,35 +140,34 @@
                 Welcome to Your Dashboard
             </h2>
             <div class="row">
-                <!-- Courses Assigned -->
                 <div class="col-md-4">
                     <div class="progress-card card">
                         <div class="card-body text-center">
                             <h4>Courses Assigned</h4>
-                            <p class="dash-stat">{{ courses_assigned }}</p> 
+                            <p class="dash-stat">{{ courses_assigned }}</p>
                         </div>
                     </div>
                 </div>
-                <!-- Courses Completed -->
                 <div class="col-md-4">
                     <div class="progress-card card">
                         <div class="card-body text-center">
                             <h4>Courses Completed</h4>
-                            <p class="dash-stat">{{ courses_completed }}</p> 
+                            <p class="dash-stat">{{ courses_completed }}</p>
                         </div>
                     </div>
                 </div>
-                <!-- Upcoming Courses -->
                 <div class="col-md-4">
                     <div class="progress-card card">
                         <div class="card-body text-center">
                             <h4>Courses to Start</h4>
-                            <p class="dash-stat">{{ courses_to_start }}</p> 
+                            <p class="dash-stat">{{ courses_to_start }}</p>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- Action Cards -->
             <div class="row">
+                <!-- Available Courses -->
                 <div class="col-md-6">
                     <div class="action-card card">
                         <div class="card-body text-center">
@@ -142,6 +178,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- My Progress -->
                 <div class="col-md-6">
                     <div class="action-card card">
                         <div class="card-body text-center">
@@ -152,35 +189,33 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
+                <!-- Feedback -->
                 <div class="col-md-6">
                     <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-comment-dots fa-3x mb-3 text-success"></i>
                             <h4>Feedback</h4>
-                            <p>Please share your thoughts with us.</p>
+                            <p>Share your thoughts with us</p>
                             <a href="/api/submit-feedback/" class="btn btn-employee">Submit Feedback</a>
                         </div>
                     </div>
                 </div>
+                <!-- Notifications -->
                 <div class="col-md-6">
                     <div class="action-card card">
                         <div class="card-body text-center">
                             <i class="fas fa-bell fa-3x mb-3 text-success notification-bell">
-                                <!-- Show the red dot if there are unread notifications -->
                                 {% if unread_notifications_count > 0 %}
                                     <span class="red-dot">{{ unread_notifications_count }}</span>
                                 {% endif %}
                             </i>
                             <h4>Notifications</h4>
                             <p>Get notified when assigned a course</p>
-                            <a href="/api/view-notifications/" class="btn btn-employee">View notifications</a>
+                            <a href="/api/view-notifications/" class="btn btn-employee">View Notifications</a>
                         </div>
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </body>

@@ -19,7 +19,7 @@
             border: 1px solid rgba(255, 255, 255, 0.18);
         }
         .stats-card {
-            background: linear-gradient(45deg, #2e7d32, #388e3c); /* Green gradient */
+            background: linear-gradient(45deg, #2e7d32, #388e3c);
             color: white;
             border-radius: 15px;
             padding: 20px;
@@ -56,14 +56,49 @@
         }
         .btn-manager:hover {
             background: #388e3c;
-            color: white;
             transform: translateY(-2px);
         }
         .dash-stat {
             font-size: 25px;
             font-weight: bolder;
         }
+
+        /* Dark Theme */
+        .dark-theme {
+            background: #121212;
+            color: #e0e0e0;
+        }
+        .dark-theme .dashboard-container {
+            background: rgba(48, 48, 48, 0.95);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        .dark-theme .stats-card {
+            background: linear-gradient(45deg, #1b5e20, #2e7d32);
+        }
+        .dark-theme .action-card {
+            background: #1e1e1e;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+        }
+        #theme-toggle-btn {
+            transition: all 0.3s ease;
+        }
+        #theme-toggle-btn:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        #theme-toggle-btn i {
+            color: white;
+        }
+        #theme-toggle-btn:hover i {
+            color: #2e7d32;
+        }
     </style>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+    </script>
 </head>
 <body>
     <!-- Navbar -->
@@ -73,6 +108,9 @@
             <div class="navbar-nav ms-auto">
                 <span class="nav-link"><i class="fas fa-user me-2"></i>Welcome, {{ user.username }}</span>
                 <a class="nav-link" href="/api/logout/"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                <button style="border: none;" onclick="toggleTheme()" class="btn btn-outline-light ms-3" id="theme-toggle-btn">
+                    <i class="fas fa-moon"></i>
+                </button>
             </div>
         </div>
     </nav>
@@ -85,7 +123,7 @@
             </h2>
             <!-- Stats boxes -->
             <div class="row">
-                <!-- Total Users -->
+                <!-- Total Courses -->
                 <div class="col-md-4">
                     <div class="stats-card card">
                         <div class="card-body text-center">
@@ -94,7 +132,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Total Courses -->
+                <!-- Approved Requests -->
                 <div class="col-md-4">
                     <div class="stats-card card">
                         <div class="card-body text-center">
