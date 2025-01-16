@@ -26,14 +26,13 @@
         .form-control {
             border-radius: 25px;
             padding: 12px 20px;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
             border: 2px solid #e8f5e9;
             color: rgb(110,117,124);
         }
         .form-control:focus {
             border-color: #2e7d32;
             box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
-            
         }
         .btn-login {
             background: #2e7d32;
@@ -76,6 +75,12 @@
         .input-group input {
             padding-left: 45px;
         }
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -87,28 +92,18 @@
                         <i class="fas fa-user-circle fa-2x mb-3"></i><br>
                         Login
                     </h2>
-                    <form method="POST">
+                    <form id="loginForm" method="POST">
                         {% csrf_token %}
                         <div class="input-group">
                             <i class="fas fa-user"></i>
-                            <input type="text" name="username" class="form-control" placeholder="Username" required>
+                            <input type="text" id="username" name="username" class="form-control" placeholder="Username">
+                            <div class="error" id="usernameError"></div>
                         </div>
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
-                            <input type="password" name="password" class="form-control" placeholder="Password" required>
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Password">
+                            <div class="error" id="passwordError"></div>
                         </div>
-                        <!--  
-                        <div class="input-group">
-                            <i class="fas fa-briefcase"></i>
-                            
-                            <select id="roleSelect" name="role" class="form-control" required>
-                                <option value="" disabled selected>Select Role</option>
-                                
-                                <option value="employee">Employee</option>
-                                <option value="manager">Manager</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>-->
                         <button type="submit" class="btn btn-login">
                             <i class="fas fa-sign-in-alt me-2"></i>Login
                         </button>
@@ -122,19 +117,34 @@
     </div>
 
     <script>
-        // JavaScript to handle role selection
-        const roleSelect = document.getElementById('roleSelect');
-        
-        // Initially show the 'Select Role' option
-        roleSelect.addEventListener('focus', function() {
-            if (roleSelect.value === '') {
-                roleSelect.classList.add('selected-role');
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            let valid = true;
+
+            const username = document.getElementById('username');
+            const usernameError = document.getElementById('usernameError');
+
+            const password = document.getElementById('password');
+            const passwordError = document.getElementById('passwordError');
+
+            // Clear previous error messages
+            usernameError.textContent = '';
+            passwordError.textContent = '';
+
+            // Validate username
+            if (username.value.trim() === '') {
+                usernameError.textContent = 'Username is required';
+                valid = false;
             }
-        });
-        
-        roleSelect.addEventListener('blur', function() {
-            if (roleSelect.value === '') {
-                roleSelect.classList.remove('selected-role');
+
+            // Validate password
+            if (password.value.trim() === '') {
+                passwordError.textContent = 'Password is required';
+                valid = false;
+            }
+
+            // Prevent form submission if validation fails
+            if (!valid) {
+                event.preventDefault();
             }
         });
     </script>
