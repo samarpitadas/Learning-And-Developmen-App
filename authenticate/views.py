@@ -273,7 +273,13 @@ def mark_module_completed(request, module_id):
 
 
 @login_required
+
 def track_progress(request):
+    user_role = request.user.userprofile.role
+
+    if user_role == 'employee':  # Correct the spelling of 'manager'
+        return HttpResponseForbidden("You are not authorized to access this page.")
+    
     courses = Course.objects.all()  
     progress_data = []
 
@@ -646,6 +652,11 @@ def send_credentials_email(receiver_email, subject, body, attachment=None, filen
 
 @login_required
 def submit_feedback(request):
+    user_role = request.user.userprofile.role
+
+    if user_role != 'employee':  # Correct the spelling of 'manager'
+        return HttpResponseForbidden("You are not authorized to access this page.")
+    
     if request.method == 'POST':
         if request.user.userprofile.role == 'employee':
             course_title = request.POST['course_name']
@@ -751,7 +762,10 @@ def view_notifications(request):
 def my_progress(request):
     
     user = request.user
+    user_role = request.user.userprofile.role
 
+    if user_role != 'employee':  # Correct the spelling of 'manager'
+        return HttpResponseForbidden("You are not authorized to access this page.")
     
     courses = Course.objects.all()  
     progress_data = []
@@ -859,6 +873,11 @@ def add_employee_emails(request, course_id):
 
 
 def admin_dashboard(request):
+    user_role = request.user.userprofile.role  # Example: Replace with your actual role-checking logic
+
+    if user_role != 'admin':  # Correct the spelling of 'manager'
+        return HttpResponseForbidden("You are not authorized to access this page.")
+    
     total_users = UserProfile.objects.count()
 
     total_courses = Course.objects.count()
@@ -874,6 +893,11 @@ def admin_dashboard(request):
     return render(request, 'authenticate/admin_dashboard.html', context)
 
 def manager_dashboard(request): 
+    user_role = request.user.userprofile.role # Example: Replace with your actual role-checking logic
+
+    if user_role != 'manager':  # Correct the spelling of 'manager'
+        return HttpResponseForbidden("You are not authorized to access this page.")
+    
     total_courses = Course.objects.count()
 
     approved_requests = ManagerRequest.objects.filter(status='approved').count()
@@ -889,6 +913,11 @@ def manager_dashboard(request):
     return render(request, 'authenticate/manager_dashboard.html', context)
 
 def employee_dashboard(request):
+    user_role = request.user.userprofile.role
+
+    if user_role != 'employee':  # Correct the spelling of 'manager'
+        return HttpResponseForbidden("You are not authorized to access this page.")
+    
     user_email = request.user.email
     assigned_courses = Course.objects.filter(employee_emails__email=user_email).count()
 
